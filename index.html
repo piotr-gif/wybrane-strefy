@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kantyna - Ciemny Tryb Neon (Firebase)</title>
+<style>
+  * {margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif;}
+  body {background:black; color:white; display:flex; justify-content:center; padding:30px;}
+
+  .container {width:1200px; position:relative;}
+
+  /* KANTYNA */
+  .kantyna {position:relative; width:820px; height:140px; margin-left:170px; margin-bottom:-3px;}
+  .kantyna-main {
+    position:absolute; bottom:0; left:0; width:820px; height:90px; background:#063f78;
+    border:4px solid #63c9f2; display:flex; align-items:center; justify-content:center;
+    border-radius:10px; box-shadow:0 0 15px #63c9f2 inset, 0 0 20px #6399f2;
+  }
+  .kantyna-main span {font-size:48px; font-weight:800; color:#63c9f2; text-shadow:0 0 10px #63c9f2;}
+  .kantyna-top {
+    position:absolute; top:0; right:0; width:290px; height:60px; background:#063f78;
+    border:4px solid #63c9f2; border-bottom:none; border-radius:5px;
+    box-shadow:0 0 10px #63c9f2 inset;
+  }
+
+  /* GRID Z RÓŻNYMI ODSTĘPAMI */
+  .layout {display:flex; align-items:flex-start; position:relative; margin-top:10px;}
+  .grid {display:flex; flex-direction:column; background-color:#111; padding:5px; border-radius:10px;}
+
+  /* ZMIANA: dodano 25px odstęp między kolumną 4 a 5 (colIndex 5 i 6 to teraz spacer) */
+  .row {
+    display:grid; 
+    grid-template-columns: 200px 25px 200px 25px 200px 200px 25px 200px 200px 25px 200px;
+    column-gap:0;
+  }
+  .row.space-big {margin-bottom:25px;}   /* duży odstęp */
+  .row.space-small {margin-bottom:10px;} /* mały odstęp */
+
+  .page {display:none;}
+  .page.active {display:flex; flex-direction:column; background-color:#111; box-shadow:0 0 20px #63c9f2;}
+
+  .cell {
+    background:#ff0000;
+    border:2px solid #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    font-weight:700;
+    cursor:pointer;
+    border-radius:5px;
+    transition:0.2s;
+    height:130px;
+  }
+  .cell:hover {transform:scale(1.05);}
+  .cell.active {background:#00ff00; border-color:#0f0; box-shadow:0 0 10px #0f0;}
+  .cell.empty {background:transparent; border:none; pointer-events:none;}
+  
+  /* Klasy dla komórek odstępów */
+  .spacer {
+    background: transparent;
+    border: none;
+    pointer-events: none;
+    height:130px;
+  }
+
+  /* STURT + WINDY w jednym wierszu */
+  .bottom-row {
+    display:flex; justify-content:center; align-items:center; gap:25px; margin-top:30px;
+  }
+
+  .sturtup {
+    width:415px; height:90px; background:#063f78; border:4px solid #63c9f2; display:flex;
+    justify-content:center; align-items:center; border-radius:10px;
+    box-shadow:0 0 15px #63c9f2 inset,0 0 20px #6399f2;
+  }
+  .sturtup span {font-size:38px; font-weight:800; color:#63c9f2; text-shadow:0 0 10px #63c9f2;}
+
+  .windy {
+    width:200px; height:90px; background:#ffee00; border:4px solid #ffff66; display:flex;
+    align-items:center; justify-content:center; border-radius:10px;
+    box-shadow:0 0 25px #ffff66,0 0 35px #ffffaa inset;
+    font-size:30px; font-weight:800; color:black; text-shadow:0 0 5px #ffffaa;
+  }
+
+  /* CREATED BY */
+  .created-by {
+    text-align:center; margin-top:20px; font-size:23px;
+    color:#63c9f2; text-shadow:0 0 8px #63c9f2; letter-spacing:2px;
+  }
+
+  /* NAWIGACJA */
+  .navigation {margin-top:40px; display:flex; gap:10px; justify-content:center;}
+  .navigation button {
+    cursor:pointer; border:none; padding:10px 16px; font-weight:bold; border-radius:8px;
+    background:#222; color:#fff; box-shadow:0 0 5px #63c9f2,0 0 10px #63c9f2 inset;
+    transition:0.3s; font-size:16px;
+  }
+  .navigation button:hover {background:#63c9f2; color:#000; box-shadow:0 0 20px #63c9f2;}
+  .navigation button.active {background:#63c9f2; color:#000; box-shadow:0 0 20px #63c9f2;}
+  #clearBtn {background:#f44336; box-shadow:0 0 5px #f44336,0 0 10px #f44336 inset;}
+  #clearBtn:hover {background:#e53935; box-shadow:0 0 20px #f44336; color:#fff;}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- KANTYNA -->
+  <div class="kantyna">
+    <div class="kantyna-main"><span>KANTYNA</span></div>
+    <div class="kantyna-top"></div>
+  </div>
+
+  <!-- BLOK GŁÓWNY -->
+  <div class="layout">
+    <div class="grid page active" id="p1"></div>
+    <div class="grid page" id="p2"></div>
+    <div class="grid page" id="p3"></div>
+    <div class="grid page" id="p4"></div>
+  </div>
+
+  <!-- STURT UP + WINDY -->
+  <div class="bottom-row">
+    <div class="windy">WINDY</div>
+    <div class="sturtup"><span>START UP</span></div>
+    <div class="windy">WINDY</div>
+  </div>
+
+  <!-- CREATED BY -->
+  <div class="created-by">created by jastpiot</div>
+
+  <!-- NAWIGACJA -->
+  <div class="navigation">
+    <button onclick="showPage('p1')" id="btn-p1" class="active">P1</button>
+    <button onclick="showPage('p2')" id="btn-p2">P2</button>
+    <button onclick="showPage('p3')" id="btn-p3">P3</button>
+    <button onclick="showPage('p4')" id="btn-p4">P4</button>
+    <button id="clearBtn" onclick="clearPage()">Wyczyść zaznaczenia</button>
+  </div>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD8kloH3cgRnfGDZMXdLtugHU_NE69Xc34",
+  authDomain: "wybrane-strefy.firebaseapp.com",
+  projectId: "wybrane-strefy",
+  storageBucket: "wybrane-strefy.firebasestorage.app",
+  messagingSenderId: "839026870465",
+  appId: "1:839026870465:web:8d529d8fe5a961fc782c40",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const docRef = db.collection("kantyna").doc("state");
+
+const pages = ['p1', 'p2', 'p3', 'p4'];
+
+// Lista wszystkich możliwych ID komórek
+const allCellIds = [
+  'A1', 'A2', 'A3', 'A4',
+  'B1', 'B2', 'B3', 'B4',
+  'C1', 'C2', 'C3', 'C4',
+  'D1', 'D2', 'D3', 'D4',
+  'E1', 'E2', 'E3', 'E4',
+  'F1', 'F2', 'F3', 'F4',
+  'G1', 'G2', 'G3',
+  // Nowe połączone kafelki dla p3
+  'A2-B1-DMG', 'A4-B3-DMG'
+];
+
+// Mapowanie połączonych kafelków na ich oryginalne składniki
+const mergedCellsMap = {
+  'A2-B1-DMG': ['A2', 'B1'],
+  'A4-B3-DMG': ['A4', 'B3']
+};
+
+// Mapowanie odwrotne: oryginalny ID -> nowy ID
+const reverseMergedMap = {
+  'A2': 'A2-B1-DMG',
+  'B1': 'A2-B1-DMG',
+  'A4': 'A4-B3-DMG',
+  'B3': 'A4-B3-DMG'
+};
+
+// Inicjalizacja pageState
+let pageState = {};
+
+function initializePageState() {
+  const newState = {};
+  pages.forEach(page => {
+    newState[page] = {};
+    allCellIds.forEach(cellId => {
+      newState[page][cellId] = false;
+    });
+  });
+  return newState;
+}
+
+// Inicjalizuj
+pageState = initializePageState();
+
+// ZMIANA: mapowanie zaktualizowane — colIndex 6 to teraz spacer (25px między kol. 4 a 5),
+// więc F i G kolumny przesunięte na colIndex 7, 8, 10
+const rowCells = [
+  // Wiersz 0:  col0   col2   col4   col5   col7   col8   col10
+  {0: 'B2', 2: 'B4', 4: 'D2', 5: 'D4', 7: 'F2', 8: 'F4', 10: null},
+  // Wiersz 1
+  {0: 'B1', 2: 'B3', 4: 'D1', 5: 'D3', 7: 'F1', 8: 'F3', 10: 'G3'},
+  // Wiersz 2
+  {0: 'A2', 2: 'A4', 4: 'C2', 5: 'C4', 7: 'E2', 8: 'E4', 10: 'G2'},
+  // Wiersz 3
+  {0: 'A1', 2: 'A3', 4: 'C1', 5: 'C3', 7: 'E1', 8: 'E3', 10: 'G1'}
+];
+
+// Specjalne mapowanie dla p3 - zastępujemy pojedyncze komórki połączonymi
+const p3CellMapping = {
+  // Zastąp A2 i B1 jednym kafelkiem A2-B1-DMG
+  'A2': 'A2-B1-DMG',
+  'B1': 'A2-B1-DMG',
+  // Zastąp A4 i B3 jednym kafelkiem A4-B3-DMG
+  'A4': 'A4-B3-DMG',
+  'B3': 'A4-B3-DMG'
+};
+
+function createCells() {
+  pages.forEach(pageId => {
+    const page = document.getElementById(pageId);
+    if (!page) return;
+    
+    page.innerHTML = '';
+    
+    for (let rowIndex = 0; rowIndex < 4; rowIndex++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.classList.add('row');
+      if (rowIndex === 0) rowDiv.classList.add('space-big');
+      if (rowIndex === 1) rowDiv.classList.add('space-small');
+      if (rowIndex === 2) rowDiv.classList.add('space-big');
+      
+      // Śledzenie czy już dodaliśmy połączony kafelek
+      const addedMergedCells = new Set();
+      
+      // ZMIANA: pętla do 11 (było 10), spacery na indeksach 1, 3, 6, 9 (dodano 6)
+      for (let colIndex = 0; colIndex < 11; colIndex++) {
+        // Sprawdź czy to spacer
+        if (colIndex === 1 || colIndex === 3 || colIndex === 6 || colIndex === 9) {
+          const spacer = document.createElement('div');
+          spacer.classList.add('spacer');
+          rowDiv.appendChild(spacer);
+          continue;
+        }
+        
+        let cellId = rowCells[rowIndex][colIndex] || null;
+        
+        // Dla p3, sprawdź czy to komórka która powinna być połączona
+        if (pageId === 'p3' && cellId && p3CellMapping[cellId]) {
+          const mergedId = p3CellMapping[cellId];
+          
+          // Jeśli już dodaliśmy ten połączony kafelek, pomiń
+          if (addedMergedCells.has(mergedId)) {
+            // Dodaj pusty kafelek w miejsce drugiej komórki
+            const emptyCell = document.createElement('div');
+            emptyCell.classList.add('cell', 'empty');
+            emptyCell.textContent = '';
+            rowDiv.appendChild(emptyCell);
+            continue;
+          }
+          
+          // Zaznacz że dodajemy połączony kafelek
+          addedMergedCells.add(mergedId);
+          cellId = mergedId;
+        }
+        
+        const cell = document.createElement('div');
+        
+        if (!cellId) {
+          cell.classList.add('cell', 'empty');
+          cell.textContent = '';
+        } else {
+          cell.classList.add('cell');
+          cell.dataset.id = cellId;
+          cell.dataset.page = pageId;
+          
+          // Specjalne etykiety dla poszczególnych stron
+          if (pageId === 'p1') {
+            const p1Labels = {
+              'E1': 'E1-DMG', 'E2': 'E2-DMG', 'E3': 'E3-DMG', 'E4': 'E4-DMG',
+              'F1': 'F1-DMG', 'F2': 'F2-DMG', 'F3': 'F3-DMG', 'F4': 'F4-DMG',
+              'G1': 'G1-DMG', 'G2': 'G2-DMG', 'G3': 'G3-DMG',
+              'A3': 'T2B', 'C1': 'MEDIA/NCPR'
+            };
+            cell.textContent = p1Labels[cellId] || cellId;
+          } else if (pageId === 'p2') {
+            cell.textContent = cellId;
+          } else if (pageId === 'p3') {
+            const p3Labels = {
+              'A1': 'A1-BUTY NS',
+              'A2-B1-DMG': 'A2-DMG',
+              'A3': 'A3-DMG',
+              'A4-B3-DMG': 'A4-DMG',
+              'B2': 'B2-DMG',
+              'B4': 'B4-DMG'
+            };
+            cell.textContent = p3Labels[cellId] || cellId;
+          } else if (pageId === 'p4') {
+            const p4Labels = {
+              'E3': 'E3-WIESZAKI', 'E4': 'E4-WIESZAKI',
+              'F3': 'F3-WIESZAKI', 'F4': 'F4-WIESZAKI',
+              'G1': 'G1-WIESZAKI', 'G2': 'G2-WIESZAKI', 'G3': 'G3-WIESZAKI'
+            };
+            cell.textContent = p4Labels[cellId] || cellId;
+          }
+          
+          // Ustaw początkowy stan
+          if (pageState[pageId] && pageState[pageId][cellId]) {
+            cell.classList.add('active');
+          }
+          
+          cell.addEventListener('click', () => {
+            cell.classList.toggle('active');
+            pageState[pageId][cellId] = cell.classList.contains('active');
+            saveData();
+          });
+        }
+        rowDiv.appendChild(cell);
+      }
+      page.appendChild(rowDiv);
+    }
+  });
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  pages.forEach(p => {
+    const btn = document.getElementById('btn-' + p);
+    if (btn) btn.classList.toggle('active', p === id);
+  });
+}
+
+function clearPage() {
+  const page = document.querySelector('.page.active');
+  if (!page) return;
+  
+  const id = page.id;
+  page.querySelectorAll('.cell[data-id]').forEach(c => {
+    const cid = c.dataset.id;
+    c.classList.remove('active');
+    if (pageState[id] && pageState[id][cid] !== undefined) {
+      pageState[id][cid] = false;
+    }
+  });
+  saveData();
+}
+
+function setupRealTimeListener() {
+  docRef.onSnapshot(doc => {
+    if (doc.exists) {
+      const firebaseData = doc.data();
+      const newState = initializePageState();
+      
+      pages.forEach(page => {
+        if (firebaseData[page] && typeof firebaseData[page] === 'object') {
+          Object.keys(firebaseData[page]).forEach(cellId => {
+            if (allCellIds.includes(cellId)) {
+              newState[page][cellId] = firebaseData[page][cellId] === true;
+            }
+          });
+        }
+      });
+      
+      pageState = newState;
+      updateGrid();
+      console.log('Otrzymano dane z Firebase:', firebaseData);
+    } else {
+      console.log('Dokument nie istnieje, zapisuję początkowy stan');
+      saveData();
+    }
+  }, error => {
+    console.error("Błąd nasłuchiwania Firebase:", error);
+  });
+}
+
+function updateGrid() {
+  pages.forEach(pageId => {
+    const page = document.getElementById(pageId);
+    if (!page) return;
+    
+    page.querySelectorAll('.cell[data-id]').forEach(c => {
+      const cid = c.dataset.id;
+      if (pageState[pageId] && pageState[pageId][cid] !== undefined) {
+        const shouldBeActive = pageState[pageId][cid] === true;
+        if (shouldBeActive) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      }
+    });
+  });
+}
+
+async function saveData() {
+  try {
+    const dataToSave = {};
+    pages.forEach(page => {
+      const pageData = {};
+      let hasTrue = false;
+      
+      allCellIds.forEach(cellId => {
+        if (pageState[page][cellId] === true) {
+          pageData[cellId] = true;
+          hasTrue = true;
+        }
+      });
+      
+      if (hasTrue) {
+        dataToSave[page] = pageData;
+      }
+    });
+    
+    await docRef.set(dataToSave);
+    console.log('Dane zapisane pomyślnie:', dataToSave);
+  } catch (e) {
+    console.error('Błąd zapisu do Firebase:', e);
+  }
+}
+
+// Inicjalizacja
+document.addEventListener('DOMContentLoaded', () => {
+  createCells();
+  setupRealTimeListener();
+  showPage('p1');
+});
+</script>
+
+</body>
+</html>
