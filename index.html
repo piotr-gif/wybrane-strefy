@@ -20,18 +20,9 @@
     padding: 15px;
   }
 
-  /* KLUCZOWA POPRAWKA: wrapper owijający kontener, umożliwia korektę wysokości po skalowaniu */
-  #scale-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
   .container {
     width: 1200px;
     position: relative;
-    /* transform-origin ustawiane przez JS */
-    transform-origin: top left;
   }
 
   /* KANTYNA */
@@ -123,9 +114,7 @@
 </head>
 <body>
 
-<!-- KLUCZOWA POPRAWKA: wrapper do zarządzania wysokością po skalowaniu -->
-<div id="scale-wrapper">
-  <div class="container" id="main-container">
+<div class="container" id="main-container">
 
     <!-- KANTYNA -->
     <div class="kantyna">
@@ -160,7 +149,6 @@
       <button id="clearBtn" onclick="clearPage()">Wyczyść zaznaczenia</button>
     </div>
 
-  </div>
 </div>
 
 <!-- Firebase -->
@@ -168,36 +156,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-// ============================================================
-// KLUCZOWA POPRAWKA: skalowanie kontenera do szerokości ekranu
-// ============================================================
-function applyScale() {
-  const container = document.getElementById('main-container');
-  const wrapper = document.getElementById('scale-wrapper');
-  const DESIGN_WIDTH = 1200;
-  const padding = 30; // marginesy po bokach (2 × 15px)
-  const availableWidth = window.innerWidth - padding;
-
-  if (availableWidth < DESIGN_WIDTH) {
-    const scale = availableWidth / DESIGN_WIDTH;
-    container.style.transform = `scale(${scale})`;
-    container.style.transformOrigin = 'top left';
-
-    // Korekcja wysokości wrappera — transform nie zmienia flow dokumentu,
-    // więc ręcznie ustawiamy wysokość wrappera, żeby nie było pustego miejsca
-    const naturalHeight = container.offsetHeight;
-    wrapper.style.height = Math.ceil(naturalHeight * scale) + 'px';
-    wrapper.style.justifyContent = 'flex-start';
-  } else {
-    container.style.transform = 'none';
-    wrapper.style.height = 'auto';
-    wrapper.style.justifyContent = 'center';
-  }
-}
-
-// Wywołaj przy starcie i przy zmianie rozmiaru okna
-window.addEventListener('resize', applyScale);
-// ============================================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyD8kloH3cgRnfGDZMXdLtugHU_NE69Xc34",
@@ -360,9 +318,6 @@ function createCells() {
       page.appendChild(rowDiv);
     }
   });
-
-  // Po zbudowaniu siatki zastosuj skalowanie
-  applyScale();
 }
 
 function showPage(id) {
@@ -372,8 +327,6 @@ function showPage(id) {
     const btn = document.getElementById('btn-' + p);
     if (btn) btn.classList.toggle('active', p === id);
   });
-  // Przelicz wysokość wrappera po zmianie strony (różne strony mogą mieć różną wysokość)
-  applyScale();
 }
 
 function clearPage() {
