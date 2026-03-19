@@ -6,9 +6,33 @@
 <title>Kantyna - Ciemny Tryb Neon (Firebase)</title>
 <style>
   * {margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif;}
-  body {background:black; color:white; display:flex; justify-content:center; padding:30px;}
 
-  .container {width:1200px; position:relative;}
+  /* KLUCZOWA POPRAWKA: blokada poziomego scrolla */
+  html, body {
+    overflow-x: hidden;
+    background: black;
+    color: white;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+  }
+
+  /* KLUCZOWA POPRAWKA: wrapper owijający kontener, umożliwia korektę wysokości po skalowaniu */
+  #scale-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    width: 1200px;
+    position: relative;
+    /* transform-origin ustawiane przez JS */
+    transform-origin: top left;
+  }
 
   /* KANTYNA */
   .kantyna {position:relative; width:820px; height:140px; margin-left:170px; margin-bottom:-3px;}
@@ -24,18 +48,16 @@
     box-shadow:0 0 10px #63c9f2 inset;
   }
 
-  /* GRID Z RÓŻNYMI ODSTĘPAMI */
   .layout {display:flex; align-items:flex-start; position:relative; margin-top:10px;}
   .grid {display:flex; flex-direction:column; background-color:#111; padding:5px; border-radius:10px;}
 
-  /* ZMIANA: dodano 25px odstęp między kolumną 4 a 5 (colIndex 5 i 6 to teraz spacer) */
   .row {
     display:grid; 
     grid-template-columns: 200px 25px 200px 25px 200px 200px 25px 200px 200px 25px 200px;
     column-gap:0;
   }
-  .row.space-big {margin-bottom:25px;}   /* duży odstęp */
-  .row.space-small {margin-bottom:10px;} /* mały odstęp */
+  .row.space-big {margin-bottom:25px;}
+  .row.space-small {margin-bottom:10px;}
 
   .page {display:none;}
   .page.active {display:flex; flex-direction:column; background-color:#111; box-shadow:0 0 20px #63c9f2;}
@@ -57,7 +79,6 @@
   .cell.active {background:#00ff00; border-color:#0f0; box-shadow:0 0 10px #0f0;}
   .cell.empty {background:transparent; border:none; pointer-events:none;}
   
-  /* Klasy dla komórek odstępów */
   .spacer {
     background: transparent;
     border: none;
@@ -65,7 +86,6 @@
     height:130px;
   }
 
-  /* STURT + WINDY w jednym wierszu */
   .bottom-row {
     display:flex; justify-content:center; align-items:center; gap:25px; margin-top:30px;
   }
@@ -84,14 +104,12 @@
     font-size:30px; font-weight:800; color:black; text-shadow:0 0 5px #ffffaa;
   }
 
-  /* CREATED BY */
   .created-by {
     text-align:center; margin-top:20px; font-size:23px;
     color:#63c9f2; text-shadow:0 0 8px #63c9f2; letter-spacing:2px;
   }
 
-  /* NAWIGACJA */
-  .navigation {margin-top:40px; display:flex; gap:10px; justify-content:center;}
+  .navigation {margin-top:40px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
   .navigation button {
     cursor:pointer; border:none; padding:10px 16px; font-weight:bold; border-radius:8px;
     background:#222; color:#fff; box-shadow:0 0 5px #63c9f2,0 0 10px #63c9f2 inset;
@@ -105,41 +123,44 @@
 </head>
 <body>
 
-<div class="container">
+<!-- KLUCZOWA POPRAWKA: wrapper do zarządzania wysokością po skalowaniu -->
+<div id="scale-wrapper">
+  <div class="container" id="main-container">
 
-  <!-- KANTYNA -->
-  <div class="kantyna">
-    <div class="kantyna-main"><span>KANTYNA</span></div>
-    <div class="kantyna-top"></div>
+    <!-- KANTYNA -->
+    <div class="kantyna">
+      <div class="kantyna-main"><span>KANTYNA</span></div>
+      <div class="kantyna-top"></div>
+    </div>
+
+    <!-- BLOK GŁÓWNY -->
+    <div class="layout">
+      <div class="grid page active" id="p1"></div>
+      <div class="grid page" id="p2"></div>
+      <div class="grid page" id="p3"></div>
+      <div class="grid page" id="p4"></div>
+    </div>
+
+    <!-- STURT UP + WINDY -->
+    <div class="bottom-row">
+      <div class="windy">WINDY</div>
+      <div class="sturtup"><span>START UP</span></div>
+      <div class="windy">WINDY</div>
+    </div>
+
+    <!-- CREATED BY -->
+    <div class="created-by">created by jastpiot</div>
+
+    <!-- NAWIGACJA -->
+    <div class="navigation">
+      <button onclick="showPage('p1')" id="btn-p1" class="active">P1</button>
+      <button onclick="showPage('p2')" id="btn-p2">P2</button>
+      <button onclick="showPage('p3')" id="btn-p3">P3</button>
+      <button onclick="showPage('p4')" id="btn-p4">P4</button>
+      <button id="clearBtn" onclick="clearPage()">Wyczyść zaznaczenia</button>
+    </div>
+
   </div>
-
-  <!-- BLOK GŁÓWNY -->
-  <div class="layout">
-    <div class="grid page active" id="p1"></div>
-    <div class="grid page" id="p2"></div>
-    <div class="grid page" id="p3"></div>
-    <div class="grid page" id="p4"></div>
-  </div>
-
-  <!-- STURT UP + WINDY -->
-  <div class="bottom-row">
-    <div class="windy">WINDY</div>
-    <div class="sturtup"><span>START UP</span></div>
-    <div class="windy">WINDY</div>
-  </div>
-
-  <!-- CREATED BY -->
-  <div class="created-by">created by jastpiot</div>
-
-  <!-- NAWIGACJA -->
-  <div class="navigation">
-    <button onclick="showPage('p1')" id="btn-p1" class="active">P1</button>
-    <button onclick="showPage('p2')" id="btn-p2">P2</button>
-    <button onclick="showPage('p3')" id="btn-p3">P3</button>
-    <button onclick="showPage('p4')" id="btn-p4">P4</button>
-    <button id="clearBtn" onclick="clearPage()">Wyczyść zaznaczenia</button>
-  </div>
-
 </div>
 
 <!-- Firebase -->
@@ -147,6 +168,37 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
+// ============================================================
+// KLUCZOWA POPRAWKA: skalowanie kontenera do szerokości ekranu
+// ============================================================
+function applyScale() {
+  const container = document.getElementById('main-container');
+  const wrapper = document.getElementById('scale-wrapper');
+  const DESIGN_WIDTH = 1200;
+  const padding = 30; // marginesy po bokach (2 × 15px)
+  const availableWidth = window.innerWidth - padding;
+
+  if (availableWidth < DESIGN_WIDTH) {
+    const scale = availableWidth / DESIGN_WIDTH;
+    container.style.transform = `scale(${scale})`;
+    container.style.transformOrigin = 'top left';
+
+    // Korekcja wysokości wrappera — transform nie zmienia flow dokumentu,
+    // więc ręcznie ustawiamy wysokość wrappera, żeby nie było pustego miejsca
+    const naturalHeight = container.offsetHeight;
+    wrapper.style.height = Math.ceil(naturalHeight * scale) + 'px';
+    wrapper.style.justifyContent = 'flex-start';
+  } else {
+    container.style.transform = 'none';
+    wrapper.style.height = 'auto';
+    wrapper.style.justifyContent = 'center';
+  }
+}
+
+// Wywołaj przy starcie i przy zmianie rozmiaru okna
+window.addEventListener('resize', applyScale);
+// ============================================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyD8kloH3cgRnfGDZMXdLtugHU_NE69Xc34",
   authDomain: "wybrane-strefy.firebaseapp.com",
@@ -161,7 +213,6 @@ const docRef = db.collection("kantyna").doc("state");
 
 const pages = ['p1', 'p2', 'p3', 'p4'];
 
-// Lista wszystkich możliwych ID komórek
 const allCellIds = [
   'A1', 'A2', 'A3', 'A4',
   'B1', 'B2', 'B3', 'B4',
@@ -170,17 +221,14 @@ const allCellIds = [
   'E1', 'E2', 'E3', 'E4',
   'F1', 'F2', 'F3', 'F4',
   'G1', 'G2', 'G3',
-  // Nowe połączone kafelki dla p3
   'A2-B1-DMG', 'A4-B3-DMG'
 ];
 
-// Mapowanie połączonych kafelków na ich oryginalne składniki
 const mergedCellsMap = {
   'A2-B1-DMG': ['A2', 'B1'],
   'A4-B3-DMG': ['A4', 'B3']
 };
 
-// Mapowanie odwrotne: oryginalny ID -> nowy ID
 const reverseMergedMap = {
   'A2': 'A2-B1-DMG',
   'B1': 'A2-B1-DMG',
@@ -188,7 +236,6 @@ const reverseMergedMap = {
   'B3': 'A4-B3-DMG'
 };
 
-// Inicjalizacja pageState
 let pageState = {};
 
 function initializePageState() {
@@ -202,28 +249,18 @@ function initializePageState() {
   return newState;
 }
 
-// Inicjalizuj
 pageState = initializePageState();
 
-// ZMIANA: mapowanie zaktualizowane — colIndex 6 to teraz spacer (25px między kol. 4 a 5),
-// więc F i G kolumny przesunięte na colIndex 7, 8, 10
 const rowCells = [
-  // Wiersz 0:  col0   col2   col4   col5   col7   col8   col10
   {0: 'B2', 2: 'B4', 4: 'D2', 5: 'D4', 7: 'F2', 8: 'F4', 10: null},
-  // Wiersz 1
   {0: 'B1', 2: 'B3', 4: 'D1', 5: 'D3', 7: 'F1', 8: 'F3', 10: 'G3'},
-  // Wiersz 2
   {0: 'A2', 2: 'A4', 4: 'C2', 5: 'C4', 7: 'E2', 8: 'E4', 10: 'G2'},
-  // Wiersz 3
   {0: 'A1', 2: 'A3', 4: 'C1', 5: 'C3', 7: 'E1', 8: 'E3', 10: 'G1'}
 ];
 
-// Specjalne mapowanie dla p3 - zastępujemy pojedyncze komórki połączonymi
 const p3CellMapping = {
-  // Zastąp A2 i B1 jednym kafelkiem A2-B1-DMG
   'A2': 'A2-B1-DMG',
   'B1': 'A2-B1-DMG',
-  // Zastąp A4 i B3 jednym kafelkiem A4-B3-DMG
   'A4': 'A4-B3-DMG',
   'B3': 'A4-B3-DMG'
 };
@@ -242,12 +279,9 @@ function createCells() {
       if (rowIndex === 1) rowDiv.classList.add('space-small');
       if (rowIndex === 2) rowDiv.classList.add('space-big');
       
-      // Śledzenie czy już dodaliśmy połączony kafelek
       const addedMergedCells = new Set();
       
-      // ZMIANA: pętla do 11 (było 10), spacery na indeksach 1, 3, 6, 9 (dodano 6)
       for (let colIndex = 0; colIndex < 11; colIndex++) {
-        // Sprawdź czy to spacer
         if (colIndex === 1 || colIndex === 3 || colIndex === 6 || colIndex === 9) {
           const spacer = document.createElement('div');
           spacer.classList.add('spacer');
@@ -257,13 +291,10 @@ function createCells() {
         
         let cellId = rowCells[rowIndex][colIndex] || null;
         
-        // Dla p3, sprawdź czy to komórka która powinna być połączona
         if (pageId === 'p3' && cellId && p3CellMapping[cellId]) {
           const mergedId = p3CellMapping[cellId];
           
-          // Jeśli już dodaliśmy ten połączony kafelek, pomiń
           if (addedMergedCells.has(mergedId)) {
-            // Dodaj pusty kafelek w miejsce drugiej komórki
             const emptyCell = document.createElement('div');
             emptyCell.classList.add('cell', 'empty');
             emptyCell.textContent = '';
@@ -271,7 +302,6 @@ function createCells() {
             continue;
           }
           
-          // Zaznacz że dodajemy połączony kafelek
           addedMergedCells.add(mergedId);
           cellId = mergedId;
         }
@@ -286,7 +316,6 @@ function createCells() {
           cell.dataset.id = cellId;
           cell.dataset.page = pageId;
           
-          // Specjalne etykiety dla poszczególnych stron
           if (pageId === 'p1') {
             const p1Labels = {
               'E1': 'E1-DMG', 'E2': 'E2-DMG', 'E3': 'E3-DMG', 'E4': 'E4-DMG',
@@ -316,7 +345,6 @@ function createCells() {
             cell.textContent = p4Labels[cellId] || cellId;
           }
           
-          // Ustaw początkowy stan
           if (pageState[pageId] && pageState[pageId][cellId]) {
             cell.classList.add('active');
           }
@@ -332,6 +360,9 @@ function createCells() {
       page.appendChild(rowDiv);
     }
   });
+
+  // Po zbudowaniu siatki zastosuj skalowanie
+  applyScale();
 }
 
 function showPage(id) {
@@ -341,6 +372,8 @@ function showPage(id) {
     const btn = document.getElementById('btn-' + p);
     if (btn) btn.classList.toggle('active', p === id);
   });
+  // Przelicz wysokość wrappera po zmianie strony (różne strony mogą mieć różną wysokość)
+  applyScale();
 }
 
 function clearPage() {
@@ -431,7 +464,6 @@ async function saveData() {
   }
 }
 
-// Inicjalizacja
 document.addEventListener('DOMContentLoaded', () => {
   createCells();
   setupRealTimeListener();
